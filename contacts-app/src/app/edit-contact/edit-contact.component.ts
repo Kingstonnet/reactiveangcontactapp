@@ -5,9 +5,13 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContactsService } from '../contacts/contacts.service';
+import { addressTYpeValues, phoneTYpeValues } from '../contacts/contact.model';
+import {restrictedwords} from '../validators/restricted-words.validators'
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule],
@@ -34,23 +38,33 @@ export class EditContactComponent implements OnInit {
   //   }),
   // });
 
+  phoneTypes = phoneTYpeValues;
+  addressTypes = addressTYpeValues;
+
   contactForm = this.fb.nonNullable.group({
     id: '',
-    firstName: '',
+    personal:false,
+    firstName: ['',[Validators.required,Validators.minLength(3)]],
+    //firstName: new FormControl('',Validators.required),
     lastName: '',
-    dateOfBirth: <Date | null>null,
+    dateOfBirth: '',
     favoritesRanking: <number | null>null,
-    phone: this.fb.nonNullable.group({
-      phoneNumber: '',
-      phoneType: '',
-    }),
+
+    // phone: this.fb.nonNullable.group({
+    //   phoneNumber: '',
+    //   phoneType: '',
+    // }),
+
+    phones: this.fb.array([this.createPhoneGroup()]),
+
     address: this.fb.nonNullable.group({
-      streetAddress: '',
-      city: '',
-      state: '',
-      postalCode: '',
+      streetAddress: ['',Validators.required],
+      city: ['',Validators.required],
+      state: ['',Validators.required],
+      postalCode: ['',Validators.required],
       addressType: '',
     }),
+      notes:['',restrictedwords(['foo','bar'])]
   });
 
   constructor(
@@ -62,7 +76,10 @@ export class EditContactComponent implements OnInit {
 
   ngOnInit() {
     const contactId = this.route.snapshot.params['id'];
-    if (!contactId) return;
+    if (!contactId) {
+      this.subscribeToAddressschanges();
+      return;
+    }
 
     this.contactService.getContact(contactId).subscribe((contact) => {
       if (!contact) return;
@@ -76,7 +93,21 @@ export class EditContactComponent implements OnInit {
       //**********const names={firstName: contact.firstName, lastName: contact.lastName};
       //************this.contactForm.patchValue(names);
 
+
+      //this.contactForm.controls.phones.clear();
+
+      // contact.phones.forEach((phone) => {
+      //   this.contactForm.controls.phones.push(this.createPhoneGroup());
+      // });
+
+      for (let i = 1; i < contact.phones.length; i++) {
+        //this.contactForm.controls.phones.push(this.createPhoneGroup());
+        this.addPhone();
+      }
+
       this.contactForm.setValue(contact);
+
+      this.subscribeToAddressschanges();
       // this.contactForm.controls.id.setValue(contact.id);
       // this.contactForm.controls.firstName.setValue(contact.firstName);
       // this.contactForm.controls.lastName.setValue(contact.lastName);
@@ -106,12 +137,86 @@ export class EditContactComponent implements OnInit {
     });
   }
 
+  get firstName(){
+    return this.contactForm.controls.firstName;//template just have firstname to shorten
+  }
+
   saveContact() {
-    console.log(this.contactForm.controls.firstName.value);
-    console.log(this.contactForm.value);
+    //console.log(this.contactForm.controls.firstName.value);
+    console.log(this.contactForm.value.dateOfBirth,typeof this.contactForm.value.dateOfBirth);
+    console.log(this.contactForm.getRawValue());
     //this.contactService.saveContact(this.contactForm.value).subscribe({
     this.contactService.saveContact(this.contactForm.getRawValue()).subscribe({
       next: () => this.router.navigate(['/contacts']),
     });
+  }
+
+   get notes(){
+    return this.contactForm.controls.notes;
+  }
+
+    subscribeToAddressschanges(){
+    const addressgroup=this.contactForm.controls.address;
+    addressgroup.valueChanges
+    .pipe(distinctUntilChanged(this.stringifycompare))
+    .subscribe(()=>{
+      for(const controlName in addressgroup.controls){
+        addressgroup.get(controlName)?.removeValidators([Validators.required]);
+        addressgroup.get(controlName)?.updateValueAndValidity();
+      }
+    });
+
+    addressgroup.valueChanges
+    .pipe(debounceTime(3000), distinctUntilChanged(this.stringifycompare))
+    .subscribe(()=>{
+      for(const controlName in addressgroup.controls){
+        addressgroup.get(controlName)?.addValidators([Validators.required]);
+        addressgroup.get(controlName)?.updateValueAndValidity();
+      }
+    });
+  }
+
+   stringifycompare(a:any,b:any){
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+  createPhoneGroup() {
+
+  //  return this.fb.nonNullable.group({
+  //     phoneNumber: '',
+  //     phoneType: '',
+  //     preferred: false
+  //   });
+  
+  
+
+  const phgroup= this.fb.nonNullable.group({
+      phoneNumber: '',
+      phoneType: '',
+      preferred: false
+    });
+
+    //phgroup.controls.preferred.statusChanges
+
+    phgroup.controls.preferred.valueChanges
+    //.pipe(distinctUntilChanged((a,b)=>JSON.stringify(a) === JSON.stringify(b)))
+    .pipe(distinctUntilChanged(this.stringifycompare))
+    .subscribe(val=>{
+      if(val){
+        //phgroup.controls.phoneType.setValue('mobile');
+        phgroup.controls.phoneNumber.addValidators([Validators.required,Validators.minLength(10)]);
+      }
+      else{
+       // phgroup.controls.phoneNumber.clearValidators();
+       phgroup.controls.phoneNumber.removeValidators([Validators.required,Validators.minLength(10)]);
+       phgroup.controls.phoneNumber.updateValueAndValidity();
+      }
+      
+    });
+    return phgroup;
+  }
+
+  addPhone() {
+    this.contactForm.controls.phones.push(this.createPhoneGroup());
   }
 }

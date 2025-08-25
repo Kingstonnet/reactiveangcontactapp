@@ -1,35 +1,75 @@
 <div class="content">
-  <h1 class="header">
-    Edit Contact
-  </h1>
+  <h1 class="header">Edit Contact</h1>
   <form [formGroup]="contactForm" (ngSubmit)="saveContact()">
     <section>
       <nav>Name/Info</nav>
       <div>
-        <input placeholder="First Name" formControlName="firstName"/>
-        <input placeholder="Last Name" formControlName="lastName"/>
-        <input placeholder="Date of Birth" formControlName="dateOfBirth"/>
-        <input placeholder="Favorites Ranking" formControlName="favoritesRanking"/>
+        <input placeholder="First Name" 
+        [class.error]="firstName.invalid && (firstName.dirty || firstName.touched)"
+        formControlName="firstName" />
+        @if(firstName.errors?.['required'] && (firstName.dirty || firstName.touched)){<em>PLease enter first name</em>}
+        @if(firstName.errors?.['minlength'] && (firstName.dirty || firstName.touched)){<em>first name must be atleast 3 characters</em>}
+        <em *ngIf="contactForm.controls.firstName.invalid && (contactForm.controls.firstName.dirty || contactForm.controls.firstName.touched)">
+          {{ contactForm.controls.firstName.errors?.['required'] ? 'First Name is required' : '' }}
+        </em>
+        {{contactForm.controls.firstName.valid}}
+        <input placeholder="Last Name" formControlName="lastName" />
+        <input placeholder="Date of Birth" formControlName="dateOfBirth" type="date"
+        [value]="contactForm.controls.dateOfBirth.value | date:'yyyy-MM-dd'"
+         />
+           
+        <div>
+          <span>Favorites Ranking</span>
+        <input
+          placeholder="Favorites Ranking"
+          formControlName="favoritesRanking" type="range" min="0" max="5"
+        />
+        <span>{{ contactForm.value.favoritesRanking }}</span>
+        <span>{{ contactForm.controls.favoritesRanking.value }}</span>
+        </div>
+        <div><input type="checkbox" formControlName="personal"  />Personal</div>
       </div>
     </section>
     <section>
-      <nav>Phone</nav>
-      <div class="flex-column" formGroupName="phone">
+      <nav>Phones</nav>
+      <!-- <div class="flex-column" formGroupName="phone"> before changing to array --> 
+      <div class="flex-column" formArrayName="phones">
+
+        <div *ngFor="let phone of contactForm.controls.phones.controls; let i = index" [formGroupName]="i" class="flex-column">
+
         <div class="flex-group">
-          <input placeholder="Phone" formControlName="phoneNumber"/>
-          <img src="/assets/plus-grey-blue.png" class="add" />
+          <input placeholder="Phone" formControlName="phoneNumber" />
+          <img src="/assets/plus-grey-blue.png" class="add" (click)="addPhone()" />
         </div>
+        <em *ngIf="phone.controls.phoneNumber.invalid && (phone.controls.phoneNumber.dirty || phone.controls.phoneNumber.touched)">
+          Preferred Phone Number is required
+        </em>
         <div class="radio">
-          <input type="radio" value="mobile" formControlName="phoneType"> Mobile
+          <!-- <input type="radio" value="mobile" formControlName="phoneType"> Mobile
+           befor array of phone types-- seems this loop ike array need.>
           <input type="radio" value="work" formControlName="phoneType"> Work
-          <input type="radio" value="other" formControlName="phoneType"> Other
+          <input type="radio" value="other" formControlName="phoneType"> Other -->
+          <span *ngFor="let phoneType of phoneTypes">
+            <input
+              type="radio"
+              formControlName="phoneType"
+              [value]="phoneType.value"
+            />
+            {{ phoneType.title }}
+          </span>
         </div>
+        <span>
+          <input type="checkbox" formControlName="preferred" /> Preferred
+        </span>
+    </div>
+
       </div>
     </section>
     <section>
       <nav>Address</nav>
       <div>
-        <div class="address" formGroupName="address">
+        <div class="address" formGroupName="address"
+        [class.error]="contactForm.controls.address.invalid && (contactForm.controls.address.dirty || contactForm.controls.address.touched)"  >
           <div class="flex-group">
             <input placeholder="Address" formControlName="streetAddress" />
             <img src="/assets/plus-grey-blue.png" class="add" />
@@ -37,18 +77,39 @@
           <input placeholder="City" formControlName="city" />
           <input placeholder="State/Region" formControlName="state" />
           <input placeholder="Zip/Postal Code" formControlName="postalCode" />
-          <select>
-            <option value="home">Home</option>
+          <select formControlName="addressType">
+            <!-- <option value="home">Home</option>
             <option value="work">Work</option>
-            <option value="mobile">Other</option>
+            <option value="mobile">Other</option> -->
+
+            @for(addressType of addressTypes; track addressType.value){
+              <option [value]="addressType.value">{{ addressType.title }}</option>
+            }
+            <!-- <option
+              *ngFor="let addressType of addressTypes"
+              [value]="addressType.value"
+            >
+              {{ addressType.title }}
+            </option> -->
           </select>
         </div>
+        @if(contactForm.controls.address.invalid && (contactForm.controls.address.dirty || contactForm.controls.address.touched)) {
+          <em>In complete address</em>
+        }
+      </div>
+    </section>
+    <section>
+      <nav>Notes</nav>
+      <div>
+        <textarea placeholder="Notes" rows="5" formControlName="notes"  [class.error]="notes.invalid"></textarea>
+         <em *ngIf="notes.errors?.['restrictedwords']"
+          >Restricted words find:{{notes.errors?.['restrictedwords']}}</em
+        >
       </div>
     </section>
     <div class="buttons">
-    <button class="secondary">Cancel</button>
-    <button class="primary" type="submit">Save</button>
-  </div>
+      <button class="secondary">Cancel</button>
+      <button class="primary" type="submit" [disabled]="contactForm.invalid">Save</button>
+    </div>
   </form>
-  
 </div>

@@ -16,7 +16,7 @@
       @for(contact of favoriteContacts; track contact.id) {
       <tr [routerLink]="['/contacts/edit', contact.id]">
         <td>{{contact.firstName}} {{contact.lastName}}</td>
-        <td>@if(contact.phone){<span>{{contact.phone.phoneNumber}}</span>}</td>
+        <td>@if(contact.phones[0]){<span>{{contact.phones[0].phoneNumber}}</span>}</td>
         @if(contact.address) {
         <td>
           {{contact.address.streetAddress}}, {{contact.address.city}},
@@ -45,7 +45,7 @@
       @for(contact of contacts; track contact.id) {
       <tr [routerLink]="['/contacts/edit', contact.id]">
         <td>{{contact.firstName}} {{contact.lastName}}</td>
-        <td>@if(contact.phone){<span>{{contact.phone.phoneNumber}}</span>}</td>
+        <td>@if(contact.phones[0]){<span>{{contact.phones[0].phoneNumber}}</span>}</td>
         @if(contact.address) {
         <td>
           {{contact.address.streetAddress}}, {{contact.address.city}},
