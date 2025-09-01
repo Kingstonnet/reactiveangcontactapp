@@ -1,0 +1,31 @@
+<header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-6 text-center">
+  <h1 class="text-4xl font-bold">PostPulse</h1>
+  <p class="mt-2 text-lg">Your hub for managing posts</p>
+</header>
+<div class="container mx-auto p-6">
+  <div *ngIf="error()" role="alert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">{{ error() }}</div>
+
+  <form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="bg-white shadow-lg rounded-lg p-6 mb-6">
+    <input type="hidden" formControlName="id">
+    <div class="mb-4">
+      <input formControlName="title" placeholder="Post Title" class="w-full p-2 border rounded">
+      <div *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched" class="text-red-500 text-sm">Title is required</div>
+    </div>
+    <div class="mb-4">
+      <textarea formControlName="body" placeholder="Post Body" class="w-full p-2 border rounded"></textarea>
+      <div *ngIf="postForm.get('body')?.invalid && postForm.get('body')?.touched" class="text-red-500 text-sm">Body is required</div>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+  </form>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 card-container">
+    <div *ngFor="let post of posts()" class="bg-white shadow-lg rounded-lg p-6 post-card">
+      <h2 class="text-xl font-semibold post-title">{{ post.title }}</h2>
+      <p class="mt-2 text-gray-600 post-body">{{ post.body }}</p>
+      <div class="mt-4">
+        <button (click)="editPost(post)" class="bg-yellow-500 text-white px-3 py-1 rounded mr-2 hover:bg-yellow-600">Edit</button>
+        <button (click)="deletePost(post.id)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

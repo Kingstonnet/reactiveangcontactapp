@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-gray-100 text-gray-900 m-0;
+  /* Remove default margin for full-screen layout */
+}
+
+html, body {
+  @apply h-full;
+  /* Full height for body */
+}
+
+/* Root container for full-screen layout */
+#root {
+  @apply flex flex-col h-full;
+}
+
+/* Header fixed height for consistency */
+header {
+  @apply flex-shrink-0;
+}
+
+/* Full-width container */
+.container {
+  @apply w-full px-4 flex-grow;
+  /* Full width, minimal padding, fills remaining height */
+}
+
+/* Full-width, full-height card container */
+.card-container {
+  @apply flex flex-wrap gap-6;
+  /* Flex for left-to-right flow, wrap for multiple rows */
+}

@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for larger post cards */
+.post-card {
+  @apply bg-white shadow-xl rounded-2xl p-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 flex flex-col;
+  /* Increased padding, larger corners, flex for content layout */
+}
+
+/* Larger post title */
+.post-title {
+  @apply text-3xl font-bold text-gray-800 mb-4 line-clamp-2;
+  /* Larger, bolder font for prominence */
+}
+
+/* Larger post body */
+.post-body {
+  @apply text-xl text-gray-600 mb-4 line-clamp-5 flex-grow;
+  /* Larger text, more lines, flex-grow to fill card height */
+}
+
+/* Ensure cards take equal height in row */
+.card-container > * {
+  @apply h-full;
+}
