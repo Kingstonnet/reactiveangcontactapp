@@ -1,0 +1,40 @@
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Header 1</th>
+                    <th>Header 2</th>
+                    <th>Header 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Data 1</td><td>Data 2</td><td>Data 3</td></tr>
+                <!-- More data rows -->
+            </tbody>
+        </table>
+    </div>
+	
+    .table-container {
+        height: 80vh; /* Example: 80% of viewport height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        /* Ensure parent elements also have defined heights if using percentage height */
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        position: sticky; /* Make the header stick */
+        top: 0; /* Stick to the top of its scrolling ancestor */
+        background-color: #f2f2f2; /* Optional: for visibility */
+        z-index: 1; /* Ensure header stays above scrolling content */
+    }
+
+    th, td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
