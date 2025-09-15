@@ -1,0 +1,53 @@
+CREATE OR REPLACE PROCEDURE move_to_history (
+    p_ids   IN  VARCHAR2,
+    p_status OUT VARCHAR2,
+    p_errmsg OUT VARCHAR2
+) AS
+    -- Cursor to split comma separated IDs
+    CURSOR cur_ids IS
+        SELECT REGEXP_SUBSTR(p_ids, '[^,]+', 1, LEVEL) AS id
+        FROM dual
+        CONNECT BY LEVEL <= REGEXP_COUNT(p_ids, ',') + 1;
+
+    v_id active_table.id%TYPE;
+BEGIN
+    -- Assume success initially
+    p_status := 'SUCCESS';
+    p_errmsg := NULL;
+
+    -- Process each ID
+    FOR rec IN cur_ids LOOP
+        v_id := TRIM(rec.id);
+
+        -- Insert into history
+        INSERT INTO history_table (id, col1, col2, isactive, moved_date)
+        SELECT id, col1, col2, isactive, SYSDATE
+        FROM active_table
+        WHERE id = v_id;
+
+        -- Update active table
+        UPDATE active_table
+        SET isactive = 'N'
+        WHERE id = v_id;
+    END LOOP;
+
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        p_status := 'FAILED';
+        p_errmsg := SQLERRM; -- captures error message
+END;
+/
+
+
+DECLARE
+    v_status VARCHAR2(20);
+    v_errmsg VARCHAR2(4000);
+BEGIN
+    move_to_history('101,102,103', v_status, v_errmsg);
+    DBMS_OUTPUT.PUT_LINE('Status: ' || v_status);
+    DBMS_OUTPUT.PUT_LINE('Error : ' || v_errmsg);
+END;
+/
