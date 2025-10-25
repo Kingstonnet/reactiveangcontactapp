@@ -109,3 +109,10 @@ checkGlobalValidation() {
   }
   return null;
 }
+
+🧠 4️⃣ Behavior Summary
+Action	Result
+User fills Accordion A	Service updates → Accordion B sees valid: true and enables its form
+User clears Accordion A	Service updates → Accordion B resets or disables
+User modifies Accordion B	Service tracks its validity and data
+Global validation	Parent or service can validate dependency integrity
